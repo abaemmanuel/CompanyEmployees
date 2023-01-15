@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Contracts;
+using Entities.Exceptions;
 using Entities.Models;
 using LoggerService;
 using Service.Contracts;
@@ -20,20 +21,33 @@ namespace Service
             _mapper = mapper;
             
         }
-       /* public IEnumerable<Company> GetAllCompanies(bool trackChanges)
+
+        public CompanyDto CreateCompany(CompanyForCreationDto company)
         {
-            try
-            {
-                var companies = _repository.Company.GetAllCompanies(trackChanges);
-                return companies;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Something went wrong in the {nameof(GetAllCompanies)} service method {ex}");
-                throw;
-            }
-            
-        }*/
+            var companyEntity = _mapper.Map<Company>(company);
+
+            _repository.Company.CreateCompany(companyEntity);
+            _repository.Save();
+
+            var companyToReturn = _mapper.Map<CompanyDto>(companyEntity);
+
+            return companyToReturn;
+        }
+
+        /* public IEnumerable<Company> GetAllCompanies(bool trackChanges)
+{
+    try
+    {
+        var companies = _repository.Company.GetAllCompanies(trackChanges);
+        return companies;
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError($"Something went wrong in the {nameof(GetAllCompanies)} service method {ex}");
+        throw;
+    }
+
+}*/
 
         public IEnumerable<CompanyDto> GetAllCompanies(bool trackChanges)
         {
@@ -44,6 +58,23 @@ namespace Service
             return companiesDto;
             
            
+        }
+
+        public CompanyDto GetCompany(Guid id, bool trackChanges)
+        {
+            var company = _repository.Company.GetCompany(id, trackChanges);
+            //Check if the company is null
+            if (company == null)
+            /*{
+                _logger.LogError($"Company with id: {id} doesn't exist in the database.");
+                return null;
+            }*/
+            {
+                throw new CompanyNotFoundException(id);
+            }
+
+            var companyDto = _mapper.Map<CompanyDto>(company);
+            return companyDto;
         }
     }
 }
