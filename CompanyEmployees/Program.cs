@@ -1,6 +1,7 @@
 using CompanyEmployees.Extensions;
 using LoggerService;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Mvc;
 using NLog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +16,11 @@ builder.Services.ConfigureSqlContext(builder.Configuration);
 builder.Services.ConfigureRepositoryManager();
 builder.Services.ConfigureServiceManager();
 builder.Services.AddAutoMapper(typeof(Program));
+
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.SuppressModelStateInvalidFilter = true;
+});  // This is to avoid the default behavior of returning a 400 response when a model state is invalid. Or To enable custom responses from the actions Or we are suppressing a default model state validation that is implemented due to the existence of the [ApiController] attribute inall API controllers
 
 builder.Services.AddControllers(config =>
 {
